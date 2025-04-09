@@ -42,18 +42,7 @@ MAX_TICKET_QUANTITY = 3
 REFRESH_INTERVAL = 0.1  # Refresh interval in seconds
 SALE_DATE = "13.04.2025 19:00"  # Expected sale date and time
 
-# User information - REPLACE WITH YOUR ACTUAL INFORMATION
-USER_INFO = {
-    "email": os.getenv("EMAIL", "your.email@example.com"),
-    "first_name": "Your",
-    "last_name": "Name",
-    "phone": "0123456789",
-    "address": "Your Street 123",
-    "zip": "1234",
-    "city": "Your City"
-}
-
-# Login credentials
+# Login credentials from .env file
 LOGIN_EMAIL = os.getenv("EMAIL")
 LOGIN_PASSWORD = os.getenv("PASSWORD")
 
@@ -258,40 +247,30 @@ class EventfrogTicketBuyer:
     def _fill_user_info(self):
         """Fill in user information on checkout page."""
         try:
-            # Wait for form to be visible
+            logger.info("Filling in user information")
+            
+            # Wait for the form to be visible
             WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.ID, "email"))
             )
             
-            # Fill in email
-            email_field = self.driver.find_element(By.ID, "email")
-            email_field.send_keys(USER_INFO["email"])
+            # The user information should already be filled in after login
+            # Just verify that the form is present and proceed
             
-            # Fill in name
-            first_name_field = self.driver.find_element(By.ID, "firstName")
-            first_name_field.send_keys(USER_INFO["first_name"])
+            logger.info("User information should be pre-filled from account")
             
-            last_name_field = self.driver.find_element(By.ID, "lastName")
-            last_name_field.send_keys(USER_INFO["last_name"])
+            # Click continue button
+            continue_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Continue') or contains(text(), 'Next')]"))
+            )
+            continue_button.click()
+            logger.info("Clicked continue button")
             
-            # Fill in other details
-            phone_field = self.driver.find_element(By.ID, "phone")
-            phone_field.send_keys(USER_INFO["phone"])
-            
-            address_field = self.driver.find_element(By.ID, "address")
-            address_field.send_keys(USER_INFO["address"])
-            
-            zip_field = self.driver.find_element(By.ID, "zip")
-            zip_field.send_keys(USER_INFO["zip"])
-            
-            city_field = self.driver.find_element(By.ID, "city")
-            city_field.send_keys(USER_INFO["city"])
-            
-            logger.info("Filled in user information")
+            return True
             
         except Exception as e:
-            logger.error(f"Error filling user information: {str(e)}")
-            raise
+            logger.error(f"Error filling in user information: {str(e)}")
+            return False
     
     def _complete_purchase(self):
         """Complete the purchase process."""
